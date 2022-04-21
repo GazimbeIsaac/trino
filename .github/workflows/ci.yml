@@ -697,6 +697,18 @@ jobs:
             --impacted-features impacted-features.log \
             --bind=off --logs-dir logs/ --timeout 2h \
             --trino-jdk-version zulu_${{ matrix.jdk }}
+      - name: Azure Blob Filesystem Tests
+        env:
+          ABFS_CONTAINER: ${{ secrets.AZURE_ABFS_CONTAINER }}
+          ABFS_ACCOUNT: ${{ secrets.AZURE_ABFS_ACCOUNT }}
+          ABFS_ACCESS_KEY: ${{ secrets.AZURE_ABFS_ACCESSKEY }}
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          testing/bin/ptl suite run \
+            --suite abfs \
+            --config config-abfs \
+            --bind=off --logs-dir logs/ --timeout 2h \
+            --trino-jdk-version zulu_${{ matrix.jdk }}
       - name: Upload test logs and results
         uses: actions/upload-artifact@v2
         # Upload all test reports only on failure, because the artifacts are large
